@@ -8,7 +8,8 @@ const FlixActions = km({
 });
 
 const default_state = {
-	characters: characters
+	characters: characters,
+	character_show_description: {}
 };
 
 export const toggleCharacterDescription = createAction(
@@ -18,16 +19,17 @@ export const toggleCharacterDescription = createAction(
 export default (current_state, action) => {
 	const state = current_state || default_state;
 
-
 	switch (action.type) {
 		case FlixActions.TOGGLE_CHARACTER_DESCRIPTION:
-			return {...state, characters: state.characters.map(char => {
-				if (char.id === action.payload.character.id) {
-					return {...char,show_description: !char.show_description};
+			const {character} = action.payload;
+			return {
+				...state, 
+				character_show_description: {
+					...state.character_show_description, 
+					[character.id]: !state.character_show_description[character.id]
 				}
+			}
 
-				return char;
-			})}
 		default:
 			return state
 	}
