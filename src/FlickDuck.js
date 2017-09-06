@@ -39,7 +39,7 @@ export const editCharacterDetails = createAction(
             return dispatch(showErrorMessage(character, errors));
         }
 
-        return dispatch(saveCharacterEdit(character));
+        return dispatch(saveCharacterEdit(character, edit_form_data));
     }
 );
 
@@ -48,7 +48,7 @@ export const showErrorMessage = createAction(
 );
 
 export const saveCharacterEdit = createAction(
-    FlixActions.SAVE_CHARACTER_EDIT, (character) => ({character})
+    FlixActions.SAVE_CHARACTER_EDIT, (character, edit_form_data) => ({character, edit_form_data})
 );
 
 export default (current_state, action) => {
@@ -94,7 +94,7 @@ export default (current_state, action) => {
 
         case FlixActions.SAVE_CHARACTER_EDIT:
             character =  action.payload.character;
-            const edit_form_data = state.character_edit_form_data[character.id];
+            const {edit_form_data} = action.payload;
             const characters = state.characters.map(char => {
                 if (char.id === character.id) return {...char, name:edit_form_data.name, description: edit_form_data.description} 
 

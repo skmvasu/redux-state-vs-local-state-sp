@@ -6,15 +6,9 @@ const GoTCharacters = (props) => {
     return (
         <div className="characters-list">
             {characters.map(char => (
-                <CharacterRow 
-                    character={char} 
-                    character_show_description={character_show_description} 
-                    character_edit_form_data={character_edit_form_data} 
-                    show_character_edit={show_character_edit} 
-                    toggleCharacterDescription={toggleCharacterDescription} 
-                    editCharacterDetails={editCharacterDetails} 
-                    syncCharacterEditData={syncCharacterEditData} 
-                    toggleEdit={toggleEdit} 
+                <StatefulCharacterRow
+                    character={char}
+                    editCharacterDetails={editCharacterDetails}
                     key={char.id}/>
             ))}
         </div>
@@ -37,10 +31,10 @@ export const CharacterRow = ({character, character_show_description, character_e
             <div className="description">{character.description}</div>}
 
         {show_character_edit[character.id] &&
-            <EditCharacterDetails character={character} 
-                cancelEdit={toggleEditPartial} 
-                syncCharacterEditData={syncCharacterEditData} 
-                editCharacterDetails={editCharacterDetails} 
+            <EditCharacterDetails character={character}
+                cancelEdit={toggleEditPartial}
+                syncCharacterEditData={syncCharacterEditData}
+                editCharacterDetails={editCharacterDetails}
                 character_edit_form_data={character_edit_form_data}/>
         }
     </div>);
@@ -49,9 +43,26 @@ export const CharacterRow = ({character, character_show_description, character_e
 export class StatefulCharacterRow extends Component {
     constructor() {
         super();
+        this.toggleEditForm = this.toggleEditForm.bind(this);
+        this.syncCharacterEditData = this.syncCharacterEditData.bind(this);
         this.state = {
-            show_description: false
+            show_description: false,
+            show_edit_form: false,
+            edit_data: {}
         }
+    }
+
+    toggleEditForm() {
+        const {name, description} = this.props.character;
+        const show_edit_form = !this.state.show_edit_form;
+        const edit_data = show_edit_form ? {name, description} : {};
+        this.setState({show_edit_form, edit_data});
+    }
+
+    syncCharacterEditData(character, form_data) {
+        this.setState({
+            edit_data: {...this.state.edit_data, ...form_data}
+        });
     }
 
     render() {
@@ -62,14 +73,24 @@ export class StatefulCharacterRow extends Component {
                 show_description: !this.state.show_description})} >
                 {this.state.show_description ? 'collapse' : 'expand'}
             </a>
+
+            {!this.state.show_edit_form && <a href="#" onClick={this.toggleEditForm} >
+                edit
+            </a>}
             {this.state.show_description && 
                 <div className="description">{character.description}</div>}
+
+            {this.state.show_edit_form &&
+                <EditCharacterDetails character={character}
+                    cancelEdit={this.toggleEditForm}
+                    syncCharacterEditData={this.syncCharacterEditData}
+                    editCharacterDetails={this.props.editCharacterDetails}
+                    edit_data={this.state.edit_data}/>}
         </div>);
     }
 };
 
-export const EditCharacterDetails = ({character, character_edit_form_data, syncCharacterEditData, editCharacterDetails, cancelEdit}) =>  {
-    const edit_data = character_edit_form_data[character.id];
+export const EditCharacterDetails = ({character, edit_data, syncCharacterEditData, editCharacterDetails, cancelEdit}) =>  {
     const syncFormData = (key, e) => {
         const {value} = e.currentTarget;
         syncCharacterEditData(character, {
@@ -84,7 +105,7 @@ export const EditCharacterDetails = ({character, character_edit_form_data, syncC
     };
 
     return (
-        <form onSubmit={saveForm}> 
+        <form onSubmit={saveForm}>
             <label>Name: </label>
             <input name='name' value={edit_data.name} onChange={syncFormData.bind(null, 'name')}/>
             
