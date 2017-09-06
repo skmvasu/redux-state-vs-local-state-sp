@@ -80,7 +80,7 @@ export const EditCharacterDetails = ({character, character_edit_form_data, syncC
 
     const saveForm = (e) => {
         e.preventDefault();
-        editCharacterDetails(character);
+        editCharacterDetails(character, edit_data);
     };
 
     return (

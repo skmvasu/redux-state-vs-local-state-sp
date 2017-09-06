@@ -7,6 +7,8 @@ const FlixActions = km({
     TOGGLE_CHARACTER_DESCRIPTION: null,
     TOGGLE_CHARACTER_EDIT: null,
     SYNC_CHARACTER_EDIT_DATA: null,
+    VALIDATE_AND_SAVE_CHARACTER_EDIT: null,
+    VALIDATE_CHARACTER_EDIT: null,
     SAVE_CHARACTER_EDIT: null
 });
 
@@ -14,7 +16,8 @@ const default_state = {
     characters: characters,
     character_show_description: {},
     show_character_edit: {},
-    character_edit_form_data: {}
+    character_edit_form_data: {},
+    character_edit_form_errors: {}
 };
 
 export const toggleCharacterDescription = createAction(
@@ -28,7 +31,23 @@ export const toggleEdit = createAction(
 export const syncCharacterEditData = createAction(
     FlixActions.SYNC_CHARACTER_EDIT_DATA, (character, form_data) => ({character, form_data})
 );
+
 export const editCharacterDetails = createAction(
+    FlixActions.VALIDATE_AND_SAVE_CHARACTER_EDIT, (dispatch, character, edit_form_data) => {
+        const errors = validateCharacterForm(edit_form_data);
+        if (Object.keys(errors).length) {
+            return dispatch(showErrorMessage(character, errors));
+        }
+
+        return dispatch(saveCharacterEdit(character));
+    }
+);
+
+export const showErrorMessage = createAction(
+    FlixActions.VALIDATE_CHARACTER_EDIT, (character, errors) => ({character, errors, hasError: true})
+);
+
+export const saveCharacterEdit = createAction(
     FlixActions.SAVE_CHARACTER_EDIT, (character) => ({character})
 );
 
@@ -91,7 +110,28 @@ export default (current_state, action) => {
                 }
             }
 
+        case FlixActions.VALIDATE_CHARACTER_EDIT:
+            character =  action.payload.character;
+            const {errors, hasError} = action.payload; 
+
+            return {
+                ...state, 
+                character_edit_form_errors: {
+                    ...state.character_edit_form_errors, 
+                    [character.id]: {errors, hasError}
+                }
+            }
+
         default:
             return state
     }
-}
+};
+
+const validateCharacterForm = ({name, description}) => {
+    const errors = {};
+
+    if (!name) errors[name] = 'This is required';
+    if (!description) errors[description] = 'This is required';
+
+    return errors;
+};

@@ -9,7 +9,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     toggleCharacterDescription : (data) => dispatch(toggleCharacterDescription(data)),
     syncCharacterEditData : (character, form_data) => dispatch(syncCharacterEditData(character, form_data)),
-    editCharacterDetails : (character) => dispatch(editCharacterDetails(character)),
+    editCharacterDetails : (character, edit_form_data) => dispatch(editCharacterDetails(dispatch, character, edit_form_data)),
     toggleEdit : (data) => dispatch(toggleEdit(data))
 });
 
